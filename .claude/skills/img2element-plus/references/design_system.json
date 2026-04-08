@@ -9,12 +9,44 @@
     "--el-font-size-base": "14px",
     "--el-component-size": "36px"
   },
-  "component_mappings": {},
+  "component_mappings": {
+    "status_tags": { "active": "success", "inactive": "info", "error": "danger" },
+    "form_label_width": "110px",
+    "dialog_default_width": "50%",
+    "table_stripe": true,
+    "pagination_layout": "total, sizes, prev, pager, next, jumper"
+  },
   "custom_colors": {
-    "background": "#f0f2f5",
-    "sidebar_bg": "#304156",
-    "text_primary": "#303133",
-    "text_regular": "#606266"
+    "background": "#fff",
+    "text_primary": "#24292f",
+    "text_secondary": "#57606a",
+    "text_tertiary": "#8b949e",
+    "border": "#d0d7de",
+    "surface": "#f6f8fa",
+    "link": "#238636",
+    "link_hover": "#1a7f37",
+    "accent_blue": "#0969da",
+    "accent_green": "#1a7f37",
+    "accent_red": "#cf222e"
+  },
+  "code_theme": {
+    "background": "#f6f8fa",
+    "border": "#d0d7de",
+    "keyword": "#cf222e",
+    "string": "#0a3069",
+    "comment": "#6e7781",
+    "function": "#8250df",
+    "number": "#0550ae"
+  },
+  "npm_colors": {
+    "gradient_start": "#fb6056",
+    "gradient_end": "#d63d83",
+    "red": "#cb3837",
+    "green": "#238636",
+    "blue": "#0969da",
+    "purple": "#8064a9",
+    "yellow": "#f0c040",
+    "teal": "#118c55"
   },
   "font_family": "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif"
 }

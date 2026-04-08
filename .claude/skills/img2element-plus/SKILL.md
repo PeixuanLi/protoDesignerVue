@@ -303,9 +303,85 @@ Read this file at the start of each session. If it doesn't exist, create it from
 
 ---
 
-## Common Element Plus patterns
+## Common patterns
 
-These patterns recur across prototypes. When you see them in a screenshot, reproduce them with Element Plus:
+These patterns recur across prototypes. When you see them in a screenshot, reproduce them:
+
+### README / Markdown content rendering
+
+For package detail pages, documentation pages, or any page showing rendered markdown:
+
+```vue
+<!-- Code block with copy button -->
+<div class="codeblock">
+  <div class="codeblock__header">
+    <span class="codeblock__lang">typescript</span>
+    <button class="codeblock__copy" @click="copyCode('...')">Copy SVG icon</button>
+  </div>
+  <pre><code>...</code></pre>
+</div>
+
+<!-- Note / Callout block -->
+<div class="note">
+  <div class="note__icon">Info SVG</div>
+  <div class="note__content">
+    <strong>Note</strong>
+    <p>Message text</p>
+  </div>
+</div>
+
+<!-- Shields.io style badges -->
+<span class="badge">
+  <span class="badge__label">npm</span>
+  <span class="badge__value">v1.0.0</span>
+</span>
+
+<!-- Markdown table -->
+<div class="table-wrap">
+  <table>
+    <thead><tr><th>Col</th></tr></thead>
+    <tbody><tr><td>Value</td></tr></tbody>
+  </table>
+</div>
+```
+
+**CSS for code blocks**: Use `background: #f6f8fa`, `border: 1px solid #d0d7de`, monospace font. Syntax highlighting via CSS classes: `.hl-kw` (red, keywords), `.hl-str` (blue, strings), `.hl-cmt` (gray, comments), `.hl-fn` (purple, functions), `.hl-num` (blue, numbers).
+
+**CSS for note blocks**: `border-left: 4px solid #0969da`, light blue background. Tip variant uses green border + green background.
+
+**CSS for badges**: Two-tone inline-flex, left half darker (`background: #555`), right half colored per type. Rounded `3px`, `height: 22px`, `font-size: 11px`.
+
+### Sidebar with install tabs
+
+```vue
+<div class="install-box">
+  <div class="install-tabs">
+    <button v-for="tab in ['npm', 'yarn', 'pnpm']" :class="{ active: activeTab === tab }">{{ tab }}</button>
+  </div>
+  <div class="install-row">
+    <code>{{ commands[activeTab] }}</code>
+    <button @click="copy">Copy icon</button>
+  </div>
+</div>
+```
+
+Active tab: white bg + colored bottom border. Inactive: light gray bg. Install box has `border: 1px solid #e0e0e0`, rounded `6px`.
+
+### Sparkline chart
+
+```vue
+<svg viewBox="0 0 100 100" preserveAspectRatio="none" style="width:100px; height:36px">
+  <polyline :points="chartPoints" fill="none" stroke="#118c55" stroke-width="2.5" />
+</svg>
+```
+
+Compute points from data: `data.map((v, i) => ${(i/(len-1))*100},${100-(v/max)*100}).join(' ')`.
+
+---
+
+## Common Element Plus-specific patterns
+
+When using Element Plus components:
 
 ### Status / category tags
 ```vue

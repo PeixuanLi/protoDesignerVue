@@ -10,10 +10,10 @@ import PackageSidebar from '@/components/PackageSidebar.vue'
   <div class="page">
     <NavBar />
     <div class="page__body">
+      <PackageHeader />
+      <PackageTabs />
       <div class="page__main-area">
         <div class="page__content">
-          <PackageHeader />
-          <PackageTabs />
           <ReadmeContent />
         </div>
         <PackageSidebar />
@@ -29,18 +29,20 @@ import PackageSidebar from '@/components/PackageSidebar.vue'
 }
 
 .page__body {
-  max-width: 1200px;
+  max-width: 1280px;
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 0 32px;
 }
 
 .page__main-area {
   display: flex;
-  gap: 40px;
+  gap: 32px;
 }
 
 .page__content {
   flex: 1;
   min-width: 0;
+  border-right: 1px solid #e0e0e0;
+  padding-right: 32px;
 }
 </style>

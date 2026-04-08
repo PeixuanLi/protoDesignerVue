@@ -3,53 +3,61 @@ import { packageData } from '@/mock/data'
 </script>
 
 <template>
-  <div class="package-header">
-    <div class="package-header__name-row">
-      <h1 class="package-header__name">{{ packageData.name }}</h1>
-      <span class="package-header__version">{{ packageData.version }}</span>
-      <span class="package-header__badge">Public</span>
+  <div class="pkg-header">
+    <div class="pkg-header__row">
+      <h1 class="pkg-header__name">{{ packageData.name }}</h1>
+      <span class="pkg-header__version">{{ packageData.version }}</span>
+      <span class="pkg-header__public">Public</span>
     </div>
-    <p class="package-header__meta">Published {{ packageData.published }}</p>
+    <p class="pkg-header__meta">Published <span class="pkg-header__date">{{ packageData.published }}</span></p>
   </div>
 </template>
 
 <style scoped>
-.package-header {
-  padding: 24px 0 16px;
+.pkg-header {
+  padding: 20px 0 12px;
 }
 
-.package-header__name-row {
+.pkg-header__row {
   display: flex;
   align-items: baseline;
-  gap: 10px;
+  gap: 8px;
   flex-wrap: wrap;
 }
 
-.package-header__name {
-  font-size: 28px;
+.pkg-header__name {
+  font-size: 24px;
   font-weight: 700;
-  color: var(--npm-text-primary);
+  color: #24292f;
   margin: 0;
+  letter-spacing: -0.3px;
 }
 
-.package-header__version {
-  font-size: 16px;
-  color: var(--npm-text-secondary);
-}
-
-.package-header__badge {
-  display: inline-block;
-  padding: 2px 8px;
-  background: #dcffe4;
-  color: var(--npm-tag-green);
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.package-header__meta {
-  margin-top: 8px;
+.pkg-header__version {
   font-size: 14px;
-  color: var(--npm-text-secondary);
+  color: #57606a;
+  font-weight: 400;
+}
+
+.pkg-header__public {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 8px;
+  background: #dafbe1;
+  color: #1a7f37;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 20px;
+}
+
+.pkg-header__meta {
+  margin-top: 6px;
+  font-size: 13px;
+  color: #57606a;
+}
+
+.pkg-header__date {
+  color: #57606a;
 }
 </style>

@@ -9,6 +9,7 @@ export interface PackageData {
   unpackedSize: string
   totalFiles: number
   published: string
+  lastPublish: string
   typesIncluded: boolean
 }
 
@@ -19,10 +20,11 @@ export const packageData: PackageData = {
   license: 'MIT',
   repository: 'github.com/leinelissen/embedded-postgres',
   homepage: 'github.com/leinelissen/embedded-postgres#readme',
-  weeklyDownloads: 114924,
+  weeklyDownloads: 114_924,
   unpackedSize: '27.3 MB',
   totalFiles: 123,
   published: 'a month ago',
+  lastPublish: '2026-03-08',
   typesIncluded: true,
 }
 
@@ -53,3 +55,25 @@ export const versions = Array.from({ length: 10 }, (_, i) => ({
   version: `18.3.0-beta.${16 - i}`,
   date: i === 0 ? 'a month ago' : `${i + 1} months ago`,
 }))
+
+export const collaborators = [
+  { name: 'leinelissen', avatar: 'L' },
+]
+
+export const pgVersions = [
+  { platform: 'Darwin / x64', v12: true, v13: true, v14: true, v15: true, v16: true, v17: true },
+  { platform: 'Darwin / arm64', v12: false, v13: false, v14: false, v15: true, v16: true, v17: true },
+  { platform: 'Windows / x64', v12: true, v13: true, v14: true, v15: true, v16: true, v17: true },
+  { platform: 'Linux / x64', v12: true, v13: true, v14: true, v15: true, v16: true, v17: true },
+  { platform: 'Linux / arm', v12: true, v13: true, v14: true, v15: true, v16: true, v17: true },
+  { platform: 'Linux / arm64', v12: true, v13: true, v14: true, v15: true, v16: true, v17: true },
+]
+
+export const apiOptions = [
+  { property: 'databaseDir', type: 'string', description: "The location where the data should be persisted to. Defaults to './data/db'" },
+  { property: 'port', type: 'number', description: 'The port where the Postgres database should be listening. Defaults to: 5432' },
+  { property: 'user', type: 'string', description: 'The username for logging into the Postgres database. Defaults to postgres' },
+  { property: 'password', type: 'string', description: 'The password for logging into the Postgres database. Defaults to password' },
+  { property: 'persistent', type: 'boolean', description: 'Whether all data should be left in place when the database is shut down. Defaults to true.' },
+  { property: 'createPostgresUser', type: 'boolean', description: 'In case you\'re running in root-only environments, you may need to create an extra user. Defaults to false.' },
+]

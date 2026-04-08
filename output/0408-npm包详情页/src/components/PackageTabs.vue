@@ -4,55 +4,48 @@ import { ref } from 'vue'
 const activeTab = ref('readme')
 
 const tabs = [
-  { name: 'readme', label: 'Readme', color: 'var(--npm-yellow)', icon: 'book' },
-  { name: 'code', label: 'Code', color: 'var(--npm-red)', icon: 'code' },
-  { name: 'dependencies', label: '10 Dependencies', color: 'var(--npm-purple)', icon: 'deps' },
-  { name: 'dependents', label: '43 Dependents', color: 'var(--npm-blue)', icon: 'users' },
-  { name: 'versions', label: '164 Versions', color: 'var(--npm-teal)', icon: 'versions' },
+  { name: 'readme', label: 'Readme', color: '#f0c040', icon: 'book' },
+  { name: 'code', label: 'Code', color: '#cb3837', icon: 'code' },
+  { name: 'dependencies', label: '10 Dependencies', color: '#8064a9', icon: 'deps' },
+  { name: 'dependents', label: '43 Dependents', color: '#238636', icon: 'users' },
+  { name: 'versions', label: '164 Versions', color: '#0969da', icon: 'versions' },
 ]
 </script>
 
 <template>
-  <div class="package-tabs">
+  <div class="pkg-tabs">
     <div
       v-for="tab in tabs"
       :key="tab.name"
-      :class="['package-tabs__item', { 'package-tabs__item--active': activeTab === tab.name }]"
+      :class="['pkg-tabs__item', { 'pkg-tabs__item--active': activeTab === tab.name }]"
       @click="activeTab = tab.name"
     >
-      <span class="package-tabs__icon" :style="{ background: tab.color }">
-        <!-- Book icon -->
-        <svg v-if="tab.icon === 'book'" width="14" height="14" viewBox="0 0 16 16" fill="none">
-          <path d="M2 2h5v12H2V2zm7 0h5v12H9V2z" :stroke="'#fff'" stroke-width="1.2"/>
+      <span class="pkg-tabs__icon" :style="{ background: tab.color }">
+        <svg v-if="tab.icon === 'book'" width="12" height="12" viewBox="0 0 16 16" fill="none">
+          <path d="M2 2h5v12H2V2zm7 0h5v12H9V2z" stroke="#fff" stroke-width="1.3"/>
         </svg>
-        <!-- Code icon -->
-        <svg v-else-if="tab.icon === 'code'" width="14" height="14" viewBox="0 0 16 16" fill="none">
-          <path d="M5 4L1 8l4 4M11 4l4 4-4 4" :stroke="'#fff'" stroke-width="1.5" stroke-linecap="round"/>
+        <svg v-else-if="tab.icon === 'code'" width="12" height="12" viewBox="0 0 16 16" fill="none">
+          <path d="M5 4L1 8l4 4M11 4l4 4-4 4" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>
         </svg>
-        <!-- Dependencies icon -->
-        <svg v-else-if="tab.icon === 'deps'" width="14" height="14" viewBox="0 0 16 16" fill="none">
-          <circle cx="8" cy="4" r="2" :stroke="'#fff'" stroke-width="1.3"/>
-          <circle cx="4" cy="12" r="2" :stroke="'#fff'" stroke-width="1.3"/>
-          <circle cx="12" cy="12" r="2" :stroke="'#fff'" stroke-width="1.3"/>
-          <path d="M6.5 5.5L5 10M9.5 5.5L11 10" :stroke="'#fff'" stroke-width="1.2"/>
+        <svg v-else-if="tab.icon === 'deps'" width="12" height="12" viewBox="0 0 16 16" fill="none">
+          <rect x="1" y="1" width="6" height="6" rx="1" stroke="#fff" stroke-width="1.3"/>
+          <rect x="9" y="1" width="6" height="6" rx="1" stroke="#fff" stroke-width="1.3"/>
+          <rect x="5" y="9" width="6" height="6" rx="1" stroke="#fff" stroke-width="1.3"/>
         </svg>
-        <!-- Users icon -->
-        <svg v-else-if="tab.icon === 'users'" width="14" height="14" viewBox="0 0 16 16" fill="none">
-          <circle cx="5" cy="6" r="2.5" :stroke="'#fff'" stroke-width="1.3"/>
-          <circle cx="11" cy="6" r="2.5" :stroke="'#fff'" stroke-width="1.3"/>
-          <path d="M0 14c0-2.8 2.2-5 5-5s5 2.2 5 5" :stroke="'#fff'" stroke-width="1.3"/>
-          <path d="M10 9c2.8 0 5 2.2 5 5" :stroke="'#fff'" stroke-width="1.3"/>
+        <svg v-else-if="tab.icon === 'users'" width="12" height="12" viewBox="0 0 16 16" fill="none">
+          <circle cx="5.5" cy="5" r="2.5" stroke="#fff" stroke-width="1.3"/>
+          <circle cx="10.5" cy="5" r="2.5" stroke="#fff" stroke-width="1.3"/>
+          <path d="M0 14c0-2.8 2.5-5 5.5-5s5.5 2.2 5.5 5" stroke="#fff" stroke-width="1.3"/>
         </svg>
-        <!-- Versions icon -->
-        <svg v-else width="14" height="14" viewBox="0 0 16 16" fill="none">
-          <rect x="2" y="2" width="12" height="12" rx="2" :stroke="'#fff'" stroke-width="1.3"/>
-          <path d="M2 6h12M6 2v12" :stroke="'#fff'" stroke-width="1.3"/>
+        <svg v-else width="12" height="12" viewBox="0 0 16 16" fill="none">
+          <rect x="2" y="2" width="12" height="12" rx="2" stroke="#fff" stroke-width="1.3"/>
+          <path d="M2 6h12M6 2v12" stroke="#fff" stroke-width="1.3"/>
         </svg>
       </span>
-      <span class="package-tabs__label">{{ tab.label }}</span>
+      <span class="pkg-tabs__label">{{ tab.label }}</span>
       <div
         v-if="activeTab === tab.name"
-        class="package-tabs__underline"
+        class="pkg-tabs__bar"
         :style="{ background: tab.color }"
       ></div>
     </div>
@@ -60,51 +53,52 @@ const tabs = [
 </template>
 
 <style scoped>
-.package-tabs {
+.pkg-tabs {
   display: flex;
   gap: 0;
-  border-bottom: 1px solid var(--npm-border);
-  padding: 0;
+  border-bottom: 1px solid #d0d7de;
+  margin-bottom: 0;
 }
 
-.package-tabs__item {
+.pkg-tabs__item {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 12px 16px;
+  padding: 10px 16px;
   cursor: pointer;
   position: relative;
-  color: var(--npm-text-secondary);
+  color: #57606a;
   font-size: 14px;
   font-weight: 500;
-  transition: color 0.2s;
+  transition: color 0.15s;
+  white-space: nowrap;
 }
 
-.package-tabs__item:hover {
-  color: var(--npm-text-primary);
+.pkg-tabs__item:hover {
+  color: #24292f;
 }
 
-.package-tabs__item--active {
-  color: var(--npm-text-primary);
+.pkg-tabs__item--active {
+  color: #24292f;
   font-weight: 600;
 }
 
-.package-tabs__icon {
+.pkg-tabs__icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 22px;
-  border-radius: 4px;
+  width: 20px;
+  height: 20px;
+  border-radius: 3px;
   flex-shrink: 0;
 }
 
-.package-tabs__underline {
+.pkg-tabs__bar {
   position: absolute;
   bottom: -1px;
   left: 0;
   right: 0;
   height: 3px;
-  border-radius: 2px 2px 0 0;
+  border-radius: 3px 3px 0 0;
 }
 </style>
