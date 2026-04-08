@@ -1,6 +1,14 @@
 {
-  "output_root": "/Users/lipeixuan/code/001_frontend/protodesigner/proto",
-  "file_naming": "MMDD-设计名称.html",
+  "output_root": "output",
+  "project_naming": "MMDD-设计名称",
   "requirements_format": "screenshot + brief Chinese description",
-  "onboarding_completed": true
+  "onboarding_completed": true,
+  "tech_stack": {
+    "framework": "vue3",
+    "build_tool": "vite",
+    "ui_library": "element-plus",
+    "language": "typescript",
+    "router": true,
+    "state_management": "pinia"
+  }
 }

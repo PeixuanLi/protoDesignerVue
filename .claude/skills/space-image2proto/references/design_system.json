@@ -1,29 +1,20 @@
 {
-  "colors": {
-    "primary": "#6366f1",
-    "success": "#4c1",
-    "danger": "#cb3837",
-    "warning": "#ff6600",
-    "text_primary": "#333",
-    "text_regular": "#666",
-    "text_secondary": "#999",
-    "text_placeholder": "#c0c0c0",
-    "border": "#e0e0e0",
-    "background": "#f6f6f6",
-    "white": "#fff"
+  "element_plus_theme": {
+    "--el-color-primary": "#409eff",
+    "--el-color-success": "#67c23a",
+    "--el-color-danger": "#f56c6c",
+    "--el-color-warning": "#e6a23c",
+    "--el-color-info": "#909399",
+    "--el-border-radius-base": "4px",
+    "--el-font-size-base": "14px",
+    "--el-component-size": "36px"
   },
-  "components": {
-    "nav_height": "40px",
-    "border_radius": "4px",
-    "input_height": "30px",
-    "button_height": "30px",
-    "tab_active_bg": "#fff3cd",
-    "badge_green_bg": "#e6f9e6",
-    "badge_green_text": "#1a7f1a",
-    "code_block_bg": "#f6f6f6",
-    "sidebar_width": "280px"
+  "component_mappings": {},
+  "custom_colors": {
+    "background": "#f0f2f5",
+    "sidebar_bg": "#304156",
+    "text_primary": "#303133",
+    "text_regular": "#606266"
   },
-  "icon_style": "inline SVG, stroke-based, stroke-width 2, no fill",
-  "font_family": "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif",
-  "_note": "Extracted from npmjs.com package page screenshot"
+  "font_family": "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif"
 }

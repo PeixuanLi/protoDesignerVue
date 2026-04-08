@@ -1,0 +1,15 @@
+:root {
+  --npm-gradient-start: #ff6b35;
+  --npm-gradient-end: #c92086;
+  --npm-bg: #ffffff;
+  --npm-gray-bg: #f5f5f5;
+  --npm-text-primary: #1b1f23;
+  --npm-text-secondary: #6e7781;
+  --npm-border: #e0e0e0;
+  --npm-red: #cb3837;
+  --npm-tag-green: #1a9f3e;
+  --npm-yellow: #f0c040;
+  --npm-purple: #8064a9;
+  --npm-blue: #3072c6;
+  --npm-teal: #1a8e8e;
+}

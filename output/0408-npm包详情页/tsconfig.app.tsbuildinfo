@@ -1,0 +1,1 @@
+{"root":["./src/main.ts","./src/mock/data.ts","./src/router/index.ts","./src/app.vue","./src/components/navbar.vue","./src/components/packageheader.vue","./src/components/packagesidebar.vue","./src/components/packagetabs.vue","./src/components/readmecontent.vue","./src/views/mainview.vue"],"version":"5.7.3"}

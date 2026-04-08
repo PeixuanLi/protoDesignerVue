@@ -1,29 +1,29 @@
 ---
 name: space-image2proto
 description: |
-  Screenshot-to-HTML prototype generator with iterative refinement and learning memory. Use this skill whenever the user provides a screenshot, mockup, wireframe, or image of any UI and wants it reproduced as a working HTML prototype — or when they want to modify an existing prototype they previously generated. Also triggers on: "照这个做原型", "参考这个图", "把这个页面画出来", "this UI needs to be prototyped", "replicate this design", "convert this mockup to HTML", "帮我出个原型", "根据截图输出 HTML", or any image attachment combined with requests like "输出 HTML", "做成页面", "帮我实现". Even if the user just sends a screenshot with a brief instruction like "加一个字段" or "这个也一样", this skill applies — it means they want you to modify or replicate the UI shown. When in doubt, if there's a UI screenshot in the conversation, use this skill.
+  Screenshot-to-Vue prototype generator. Generates complete Vue 3 + Vite + Element Plus projects from UI screenshots, with iterative refinement and learning memory. Use this skill whenever the user provides a screenshot, mockup, wireframe, or image of any UI and wants it reproduced as a working Vue prototype — or when they want to modify an existing prototype they previously generated. Also triggers on: "照这个做原型", "参考这个图", "把这个页面画出来", "this UI needs to be prototyped", "replicate this design", "convert this mockup to Vue", "帮我出个原型", "根据截图输出页面", or any image attachment combined with requests like "输出页面", "做成页面", "帮我实现". Even if the user just sends a screenshot with a brief instruction like "加一个字段" or "这个也一样", this skill applies — it means they want you to modify or replicate the UI shown. When in doubt, if there's a UI screenshot in the conversation, use this skill.
 ---
 
-# Image-to-Prototype Skill
+# Image-to-Vue Prototype Skill
 
-You turn UI screenshots into faithful, production-quality single-file HTML prototypes and iteratively refine them based on user feedback. Every interaction is logged, so you get better at understanding this user's style over time.
+You turn UI screenshots into faithful, runnable **Vue 3 + Vite + Element Plus** prototype projects and iteratively refine them based on user feedback. Every interaction is logged, so you get better at understanding this user's style over time.
 
 ## First launch: onboarding
 
-When this skill is used for the first time (i.e., `references/learning_log.jsonl` is empty or doesn't exist, AND `references/design_system.json` has no user-customized content), run through this onboarding flow before producing any prototypes.
+When this skill is used for the first time (i.e., `references/learning_log.jsonl` is empty, AND `references/config.json` has `onboarding_completed` as `false`), run through this onboarding flow before producing any prototypes.
 
 ### 1. Collect reference images
 
-Ask the user to provide as many reference screenshots as possible from their existing product or design system. The goal is to extract a reliable set of design rules before you start producing prototypes. Ask something like:
+Ask the user to provide reference screenshots from their existing product or design system. The goal is to extract Element Plus theme overrides and component conventions. Ask something like:
 
-> "为了让原型输出更贴合你的产品风格，请先提供几张你们现有系统的截图（列表页、弹窗、表单等）。我会从中提取配色、间距、组件风格等设计规则，之后所有原型都会自动套用。"
+> "为了让原型输出更贴合你的产品风格，请先提供几张你们现有系统的截图（列表页、弹窗、表单等）。我会从中提取 Element Plus 主题变量、组件风格等设计规则，之后所有原型都会自动套用。"
 
 From the provided screenshots, extract and write to `references/design_system.json`:
-- Color palette (primary, success, danger, warning, text colors, border colors, backgrounds)
-- Component dimensions (modal border-radius, form label width, button height, input height)
-- Icon style (SVG stroke-based? filled? emoji?)
+- Element Plus CSS variable overrides (e.g., `--el-color-primary`, `--el-border-radius-base`)
+- Component conventions (form label width, table stripe, dialog width defaults)
+- Custom colors outside Element Plus defaults (sidebar bg, page background, etc.)
 - Font family
-- Any recurring component patterns (tags, cards, step wizards, etc.)
+- Any recurring component patterns (custom tags, step wizards, search bars, etc.)
 
 ### 2. Confirm requirements document format
 
@@ -36,24 +36,32 @@ Ask the user how they prefer to describe their requirements. Offer a default:
 
 Save the chosen format to `references/config.json` under `requirements_format`.
 
-### 3. Set file save location
+### 3. Set project output location
 
-Ask the user to choose a root directory for saving prototypes:
+Ask the user to choose a root directory for saving prototype projects:
 
-> "原型文件保存到哪个目录？请选择一个根目录，之后所有文件会按 `根目录/MMDD-设计名称.html` 的规则保存。"
+> "原型项目保存到哪个目录？请选择一个根目录，之后所有项目会按 `根目录/MMDD-设计名称/` 的规则保存。"
 
-Save the path to `references/config.json` under `output_root`. If the user doesn't specify, default to the current workspace folder.
+Save the path to `references/config.json` under `output_root`. Default: `output` (relative to the skill's repo root).
 
 ### 4. Write initial config
 
-After onboarding, create `references/config.json`:
+After onboarding, update `references/config.json`:
 
 ```json
 {
-  "output_root": "/path/to/user/chosen/directory",
-  "file_naming": "MMDD-设计名称.html",
+  "output_root": "output",
+  "project_naming": "MMDD-设计名称",
   "requirements_format": "screenshot + brief Chinese description",
-  "onboarding_completed": true
+  "onboarding_completed": true,
+  "tech_stack": {
+    "framework": "vue3",
+    "build_tool": "vite",
+    "ui_library": "element-plus",
+    "language": "typescript",
+    "router": true,
+    "state_management": "pinia"
+  }
 }
 ```
 
@@ -67,8 +75,8 @@ Once onboarding is done, proceed directly to the normal workflow in future sessi
 
 Before doing anything, read these files (if they exist):
 
-1. `references/config.json` — output directory, naming rules, format preferences
-2. `references/design_system.json` — the user's design system (colors, components, spacing)
+1. `references/config.json` — output directory, naming rules, tech stack, format preferences
+2. `references/design_system.json` — Element Plus theme overrides, component mappings, custom colors
 3. `references/learning_log.jsonl` — last 20 entries of accumulated interaction history
 
 If `config.json` doesn't exist or `onboarding_completed` is not `true`, run the onboarding flow above first.
@@ -77,35 +85,144 @@ If `config.json` doesn't exist or `onboarding_completed` is not `true`, run the 
 
 When the user provides a screenshot, study it carefully and extract:
 
-- **Layout structure**: How is the page organized? (modal, list page, form, dashboard, etc.)
-- **Component inventory**: What UI elements are present? (tables, forms, tabs, buttons, dropdowns, tags, step wizards, toggles, etc.)
-- **Color palette**: What colors are used for primary actions, success states, warnings, borders, backgrounds?
-- **Typography**: Font sizes, weights, colors for headings, labels, values
-- **Spacing patterns**: Padding, margins, gaps between elements
-- **Icon style**: Are icons SVG stroke-based, filled, emoji, or text?
-- **Interactive elements**: What has hover states, click behavior, step transitions?
+- **Layout structure**: How is the page organized? (list page with search, modal/dialog, form, dashboard, tab-based, step wizard, etc.)
+- **Component inventory**: What UI elements are present? Map each to an Element Plus component:
+  - Tables → `<el-table>` + `<el-table-column>` + `<el-pagination>`
+  - Forms → `<el-form>` + `<el-form-item>` + `<el-input>` / `<el-select>` / `<el-date-picker>`
+  - Modals/Dialogs → `<el-dialog>`
+  - Buttons → `<el-button>` with type/size
+  - Tags → `<el-tag>` with type
+  - Tabs → `<el-tabs>` + `<el-tab-pane>`
+  - Steps → `<el-steps>` + `<el-step>`
+  - Search bars → `<el-form :inline="true">`
+  - Dropdowns → `<el-dropdown>`
+  - Breadcrumbs → `<el-breadcrumb>`
+  - Loading → `v-loading` directive
+- **Color palette**: What Element Plus CSS variables need overriding?
+- **Typography**: Font sizes, weights for headings, labels, values
+- **Spacing patterns**: Padding, margins, gaps
+- **Interactive behavior**: Tab switching, dialog open/close, form submission, step navigation, table sorting/filtering
 
-Don't just glance at it — really look. The user cares about visual fidelity. A prototype that "kind of looks like" the screenshot is not good enough. Match the exact colors, spacing, and component styles.
+Don't just glance at it — really look. Match the exact colors, spacing, and component styles using Element Plus's customization capabilities.
 
-### Step 3: Generate the prototype
+### Step 3: Generate the Vue project
 
-**Output format: Always a single HTML file** with all CSS in a `<style>` block and all JS in a `<script>` block. No external frameworks, no CDN dependencies (except Mermaid for flowcharts).
+**Output: A complete Vue 3 + Vite + Element Plus project** that runs with `npm install && npm run dev`.
 
-**File naming**: Follow the rule in `config.json` — default is `MMDD-设计名称.html`. For example: `0327-模型类型配置.html`. Save to the `output_root` directory.
+**Project naming**: Follow the rule in `config.json` — default is `MMDD-设计名称`. Save to the `output_root` directory. Each prototype is a subdirectory.
 
-**Design principles**:
+**Project structure**:
 
-1. **Fidelity first.** Match the screenshot as closely as possible. If the screenshot shows a specific shade of blue for buttons, use that exact shade, not "close enough".
+```
+MMDD-设计名称/
+├── package.json
+├── vite.config.ts
+├── tsconfig.json
+├── tsconfig.app.json
+├── tsconfig.node.json
+├── index.html
+├── src/
+│   ├── main.ts
+│   ├── App.vue
+│   ├── router/
+│   │   └── index.ts
+│   ├── views/
+│   │   └── MainView.vue          # Main page matching the screenshot
+│   ├── components/
+│   │   └── ...                    # Extracted sub-components
+│   ├── styles/
+│   │   └── element-overrides.css  # Element Plus theme overrides
+│   └── mock/
+│       └── data.ts                # Realistic mock data
+```
 
-2. **Clean, semantic HTML.** Use meaningful class names that describe the component (`.modal-header`, `.f-row`, `.type-tag`), not generic names (`.box1`, `.div-wrapper`).
+Only include Pinia stores (`src/stores/`) if the prototype actually needs shared state management. Skip it for simple pages.
 
-3. **CSS organization.** Group styles by component with comments. Put layout/structure first, then component styles, then state styles.
+#### package.json
 
-4. **Functional interactivity.** If the screenshot implies interactive behavior (tab switching, dropdown opening, step wizard navigation, toggle switches), implement it with vanilla JS. The prototype should feel alive, not static.
+```json
+{
+  "name": "prototype-MMDD-设计名称",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc -b && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "vue": "^3.5.13",
+    "vue-router": "^4.5.0",
+    "element-plus": "^2.9.0",
+    "pinia": "^3.0.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.2.0",
+    "typescript": "~5.7.0",
+    "vite": "^6.0.0",
+    "vue-tsc": "^2.2.0"
+  }
+}
+```
 
-5. **No watermarks, no emoji.** Use clean inline SVG icons (stroke-based, not filled) by default. Only use emoji if the user specifically asks for them.
+Use exact versions that are current at generation time. Only include `pinia` in dependencies if stores are actually generated.
 
-6. **Responsive modals.** Set reasonable max-width, use `max-height` with `overflow-y: auto` for scrollable content areas.
+#### vite.config.ts
+
+```ts
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+import { resolve } from 'path'
+
+export default defineConfig({
+  plugins: [vue()],
+  resolve: {
+    alias: {
+      '@': resolve(__dirname, 'src'),
+    },
+  },
+})
+```
+
+#### src/main.ts
+
+```ts
+import { createApp } from 'vue'
+import { createPinia } from 'pinia'
+import ElementPlus from 'element-plus'
+import 'element-plus/dist/index.css'
+import './styles/element-overrides.css'
+import App from './App.vue'
+import router from './router'
+
+const app = createApp(App)
+app.use(createPinia())
+app.use(router)
+app.use(ElementPlus, { locale: undefined }) // set zhCn if needed
+app.mount('#app')
+```
+
+Remove pinia import if no stores are used.
+
+#### Design principles
+
+1. **Fidelity first.** Match the screenshot as closely as possible using Element Plus components. Override CSS variables in `element-overrides.css` when defaults don't match.
+
+2. **Component decomposition.** Split the page into focused `.vue` components. A list page with search + table + dialog becomes `SearchBar.vue`, `DataTable.vue`, `EditDialog.vue`. Each component uses `<script setup lang="ts">`.
+
+3. **Realistic mock data.** Generate Chinese-language mock data in `src/mock/data.ts` with realistic field names and values. Tables should show 10-15 rows, forms should have plausible default values.
+
+4. **Functional interactivity.** All implied behavior must work: tabs switch, dialogs open/close, forms validate, steps navigate, tables sort, pagination works. Use Vue 3 reactivity — no vanilla DOM manipulation.
+
+5. **Element Plus conventions.** Use the component API correctly:
+   - Form validation with `rules` and `ref="formRef"`
+   - Table columns with `prop`, `label`, `width`, `#default` slots
+   - Dialog with `v-model` for visibility, `@close` handler
+   - Pagination with `v-model:current-page` and `v-model:page-size`
+   - Message/Notification for feedback (not `alert()`)
+
+6. **No emoji, no watermarks.** Use Element Plus built-in icons (`<el-icon>`) or clean inline SVG. Only use emoji if the user specifically asks.
 
 ### Step 4: Handle modification requests
 
@@ -113,105 +230,211 @@ Users often send follow-up requests to modify prototypes. These requests tend to
 
 - **"这个也一样"** / **"这个弹窗也是一样"** — Apply the same pattern/change from a previous prototype to this new screenshot. Understand what "一样" refers to from the conversation context.
 
-- **"加一个XX字段"** / **"顶部显示XX"** — Add a specific field or element. Place it logically based on the screenshot and existing layout patterns.
+- **"加一个XX字段"** / **"顶部显示XX"** — Add a specific field or element. Update the relevant `.vue` component and mock data.
 
-- **"筛选框增加一个 XX"** — Add a filter/search criterion to the search bar area.
+- **"筛选框增加一个 XX"** — Add a filter to `SearchBar.vue`. Add an `<el-form-item>` to the inline form.
 
-- **"弹窗宽一些"** — Adjust dimensions. Don't just change the number — consider how the wider space should be used.
+- **"弹窗宽一些"** — Adjust the dialog `width` prop. Consider how the wider space affects form layout.
 
-- **"去掉水印"** / **"不要 emoji"** — Remove specific visual elements. Remember this preference for future prototypes.
+- **"去掉XX"** / **"不要 emoji"** — Remove specific elements. Remember this preference for future prototypes.
 
 - **"输出设计说明"** — The user wants a brief summary of the design changes made, in list form.
 
-When modifying an existing file, use the Edit tool for targeted changes rather than rewriting the entire file. When the modification is so extensive that the file structure changes fundamentally, use Write to replace the file.
+When modifying an existing project, use the Edit tool for targeted changes to specific `.vue` files rather than rewriting the entire project. When the modification is so extensive that the project structure changes fundamentally, use Write to replace affected files.
 
 ### Step 5: Update the learning log
 
 After completing each prototype or modification, append a log entry to `references/learning_log.jsonl`. Each entry is a single JSON line:
 
 ```json
-{"timestamp": "2026-03-27T14:30:00Z", "action": "create|modify", "file": "0327-模型类型配置.html", "screenshot_description": "Brief description of the UI shown in the screenshot", "changes": "What you created or modified", "user_instruction_style": "How the user communicated (terse, detailed, Chinese, English)", "design_patterns_used": ["pattern-a", "pattern-b"], "color_palette": {"primary": "#409eff"}, "user_preferences_learned": ["preference discovered in this interaction"], "component_library": ["reusable component identified"]}
+{"timestamp": "2026-04-08T14:30:00Z", "action": "create|modify", "project": "0408-模型类型配置", "screenshot_description": "Brief description of the UI", "changes": "What you created or modified", "vue_components_used": ["ElTable", "ElForm", "ElDialog", "ElPagination"], "element_plus_patterns": ["inline-form-search", "pagination-table", "dialog-form-crud"], "user_instruction_style": "How the user communicated", "user_preferences_learned": ["preference discovered"], "mock_data_structure": {"main_table": ["columns used"]}}
 ```
 
 **What to capture**:
 - `timestamp`: When this interaction happened
-- `action`: "create" for new prototypes, "modify" for changes to existing ones
-- `file`: The output filename
+- `action`: "create" for new projects, "modify" for changes
+- `project`: The project directory name
 - `screenshot_description`: Brief description of what the screenshot showed
 - `changes`: What you did
+- `vue_components_used`: Element Plus components used
+- `element_plus_patterns`: Reusable patterns applied
 - `user_instruction_style`: How the user communicated
-- `design_patterns_used`: Reusable patterns you applied
-- `color_palette`: Colors extracted or used
-- `user_preferences_learned`: New preferences discovered in this interaction
-- `component_library`: Any new reusable components identified
+- `user_preferences_learned`: New preferences discovered
+- `mock_data_structure`: Key fields in mock data
 
-This log is append-only — never overwrite it. Over time it becomes a rich record of the user's design system and communication style, making every subsequent prototype more accurate.
+This log is append-only — never overwrite it.
 
 ---
 
 ## Design system reference
 
-As you build prototypes, maintain a living reference of the user's design system in `references/design_system.json`. Update it whenever you discover new patterns. Structure:
+Maintain a living reference in `references/design_system.json`. Update it whenever you discover new patterns. Structure:
 
 ```json
 {
-  "colors": {
-    "primary": "#409eff",
-    "success": "#67c23a",
-    "danger": "#f56c6c",
-    "warning": "#e6a23c",
-    "text_primary": "#303133",
-    "text_regular": "#606266",
-    "text_placeholder": "#c0c4cc",
-    "border": "#dcdfe6",
-    "background": "#f0f2f5"
+  "element_plus_theme": {
+    "--el-color-primary": "#409eff",
+    "--el-color-success": "#67c23a",
+    "--el-color-danger": "#f56c6c",
+    "--el-color-warning": "#e6a23c",
+    "--el-color-info": "#909399",
+    "--el-border-radius-base": "4px",
+    "--el-font-size-base": "14px",
+    "--el-component-size": "36px"
   },
-  "components": {
-    "modal": {"border_radius": "8px", "header_font_size": "16px"},
+  "component_mappings": {
+    "status_tags": { "type_a": "success", "type_b": "danger", "type_c": "warning" },
     "form_label_width": "110px",
-    "button_height": "36px",
-    "input_height": "36px"
+    "dialog_default_width": "50%",
+    "table_stripe": true,
+    "pagination_layout": "total, sizes, prev, pager, next, jumper"
   },
-  "icon_style": "inline SVG, stroke-based, stroke-width 2, no fill",
+  "custom_colors": {
+    "background": "#f0f2f5",
+    "sidebar_bg": "#304156",
+    "text_primary": "#303133",
+    "text_regular": "#606266"
+  },
   "font_family": "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif"
 }
 ```
 
-Read this file at the start of each session. If it doesn't exist, create it from the first prototype you build.
+Read this file at the start of each session. If it doesn't exist, create it from the first prototype.
 
 ---
 
-## Common component patterns
+## Common Element Plus patterns
 
-These are patterns that commonly recur across prototypes. When you see them in a screenshot, you can confidently reproduce them:
+These patterns recur across prototypes. When you see them in a screenshot, reproduce them with Element Plus:
 
 ### Status / category tags
-```html
-<span class="type-tag type-a">类型A</span>
-<span class="type-tag type-b">类型B</span>
+```vue
+<el-tag :type="tagType">{{ label }}</el-tag>
 ```
-Different categories get different colors. Map category → color from the design system. Used in table columns, form headers, and detail views.
+Map categories to Element Plus tag types: `success` (green), `danger` (red), `warning` (orange), `info` (gray), `primary` (blue, default).
 
-### Two-column form layout
-Labels on the left (right-aligned, fixed width), controls on the right (flex: 1). Common in modals and step wizard forms.
+### List page with search + table + pagination
+```vue
+<!-- SearchBar.vue -->
+<el-form :inline="true" :model="searchForm">
+  <el-form-item label="名称">
+    <el-input v-model="searchForm.name" placeholder="请输入" clearable />
+  </el-form-item>
+  <el-form-item>
+    <el-button type="primary" @click="handleSearch">查询</el-button>
+    <el-button @click="handleReset">重置</el-button>
+  </el-form-item>
+</el-form>
+
+<!-- DataTable.vue -->
+<el-table :data="tableData" stripe border>
+  <el-table-column prop="name" label="名称" />
+  <el-table-column prop="status" label="状态">
+    <template #default="{ row }">
+      <el-tag :type="row.status ? 'success' : 'info'">{{ row.status ? '启用' : '禁用' }}</el-tag>
+    </template>
+  </el-table-column>
+  <el-table-column label="操作" width="200">
+    <template #default="{ row }">
+      <el-button link type="primary" @click="handleEdit(row)">编辑</el-button>
+      <el-button link type="danger" @click="handleDelete(row)">删除</el-button>
+    </template>
+  </el-table-column>
+</el-table>
+<el-pagination
+  v-model:current-page="page.current"
+  v-model:page-size="page.size"
+  :total="page.total"
+  :page-sizes="[10, 20, 50]"
+  layout="total, sizes, prev, pager, next, jumper"
+  @change="fetchData"
+/>
+```
+
+### Dialog with form (CRUD)
+```vue
+<el-dialog v-model="dialogVisible" :title="dialogTitle" width="50%" @close="resetForm">
+  <el-form ref="formRef" :model="form" :rules="rules" label-width="110px">
+    <el-form-item label="名称" prop="name">
+      <el-input v-model="form.name" />
+    </el-form-item>
+  </el-form>
+  <template #footer>
+    <el-button @click="dialogVisible = false">取消</el-button>
+    <el-button type="primary" @click="handleSubmit">确定</el-button>
+  </template>
+</el-dialog>
+```
 
 ### Step wizard
-Horizontal step bar with done/active/pending states. Green checkmark for done, dark icon for active, gray for pending. Step panels toggle with JS.
+```vue
+<el-steps :active="activeStep" finish-status="success">
+  <el-step title="基本信息" />
+  <el-step title="配置参数" />
+  <el-step title="确认提交" />
+</el-steps>
+<div v-show="activeStep === 0"><!-- Step 1 form --></div>
+<div v-show="activeStep === 1"><!-- Step 2 form --></div>
+<div v-show="activeStep === 2"><!-- Step 3 summary --></div>
+<el-button v-if="activeStep > 0" @click="activeStep--">上一步</el-button>
+<el-button v-if="activeStep < 2" type="primary" @click="activeStep++">下一步</el-button>
+<el-button v-if="activeStep === 2" type="success" @click="handleSubmit">提交</el-button>
+```
 
-### Search/filter bar
-Horizontal row of form controls (selects, inputs) with a search button. New filters typically go at the leftmost position.
+### Two-column form layout
+```vue
+<el-form :model="form" label-width="110px">
+  <el-row :gutter="20">
+    <el-col :span="12">
+      <el-form-item label="字段A" prop="fieldA">
+        <el-input v-model="form.fieldA" />
+      </el-form-item>
+    </el-col>
+    <el-col :span="12">
+      <el-form-item label="字段B" prop="fieldB">
+        <el-select v-model="form.fieldB" style="width: 100%">
+          <el-option label="选项1" value="1" />
+        </el-select>
+      </el-form-item>
+    </el-col>
+  </el-row>
+</el-form>
+```
 
-### Two-column cascading selector
-Left panel for category, right panel for items with checkboxes. Selected items shown as tags below the trigger. Used when selection depends on a parent category.
+### Tabs with content panels
+```vue
+<el-tabs v-model="activeTab">
+  <el-tab-pane label="基本信息" name="basic">
+    <!-- Basic info content -->
+  </el-tab-pane>
+  <el-tab-pane label="配置参数" name="config">
+    <!-- Config content -->
+  </el-tab-pane>
+</el-tabs>
+```
 
-### Tags with CRUD
-Tags that support add/edit/delete. Each tag shows text + edit icon (pencil SVG) + remove button (×). Tags can have types with visual differentiation (icon + color). Edit opens an overlay dialog.
+### Message feedback
+```ts
+import { ElMessage, ElMessageBox } from 'element-plus'
+
+// Success toast
+ElMessage.success('操作成功')
+
+// Confirm dialog
+await ElMessageBox.confirm('确定删除该条记录？', '提示', {
+  confirmButtonText: '确定',
+  cancelButtonText: '取消',
+  type: 'warning',
+})
+```
 
 ---
 
 ## Flowchart / Mermaid diagrams
 
-When the user describes a process flow (with → arrows or step-by-step descriptions) and asks for a flowchart, generate an HTML file that loads Mermaid.js from CDN and renders the diagram.
+When the user describes a process flow and asks for a flowchart, generate a standalone HTML file that loads Mermaid.js from CDN. This remains a single HTML file (not a Vue project) since flowcharts are standalone visual artifacts.
+
+Save as `output_root/MMDD-流程名称-flowchart.html`.
 
 ### Default style: Notion-style black & white
 
@@ -219,13 +442,12 @@ Unless the user asks for a specific color scheme, use a clean Notion-inspired mo
 
 - **Background**: pure white `#fff`
 - **Main nodes**: white fill, `#37352f` dark border (2px), `#37352f` text, rounded corners `rx:4`
-- **Sub-nodes / detail nodes**: light gray fill `#f7f6f3`, gray border `#e3e2de` (1px)
-- **Terminal / final node**: inverted — dark fill `#37352f`, white text
+- **Sub-nodes**: light gray fill `#f7f6f3`, gray border `#e3e2de` (1px)
+- **Terminal node**: dark fill `#37352f`, white text
 - **Lines**: light gray `#d3d1cb`, 1.5px
 - **Font**: system font stack, 14px
-- **Page title**: large (28px) bold, with a gray subtitle summarizing the flow
 
-**Mermaid themeVariables for Notion style:**
+**Mermaid themeVariables:**
 ```js
 {
   theme: 'base',
@@ -242,43 +464,7 @@ Unless the user asks for a specific color scheme, use a clean Notion-inspired mo
 }
 ```
 
-**Numbered steps**: Use Unicode circled numbers (①②③...) via HTML entities `&#9312;` through `&#9326;` to prefix main flow nodes. Sub-nodes don't need numbers.
-
-**When the user DOES ask for color**: Use the color palette from `design_system.json`, coloring by stage/role (e.g., blue for internal ops, green for user-facing, red for data/logging, orange for classification).
-
-### HTML template structure
-
-```html
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-<meta charset="UTF-8">
-<title>流程标题</title>
-<style>
-  /* Notion-style page: white bg, system font, centered */
-</style>
-</head>
-<body>
-  <h1>流程标题</h1>
-  <div class="subtitle">一句话摘要</div>
-  <div class="chart-container">
-    <div class="mermaid">
-      flowchart TD
-        ...
-    </div>
-  </div>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.0/mermaid.min.js"></script>
-  <script>mermaid.initialize({...});</script>
-</body>
-</html>
-```
-
-### Tips for good flowcharts
-- Use `flowchart TD` (top-down) for sequential processes, `flowchart LR` (left-right) for parallel/swim-lane flows
-- Main steps as rectangle nodes `["text"]`, branches as rounded `("text")` or circle `(("text"))`
-- Keep node labels concise (under 15 characters when possible)
-- Group related sub-details as child nodes branching from a parent step
-- Use `linkStyle default` to style all arrows at once
+Use Unicode circled numbers (①②③...) via `&#9312;` through `&#9326;` for main flow nodes.
 
 ---
 
@@ -286,22 +472,27 @@ Unless the user asks for a specific color scheme, use a clean Notion-inspired mo
 
 Before delivering any prototype, verify:
 
-- [ ] Colors match the screenshot (use exact hex values, not "close enough")
-- [ ] Layout proportions feel right (column widths, modal dimensions, spacing)
-- [ ] All interactive elements work (tabs switch, dropdowns open, steps navigate)
-- [ ] SVG icons are clean and consistent (same stroke width, same style)
-- [ ] No emoji anywhere (unless user specifically requested them)
-- [ ] File is self-contained (no external dependencies, except Mermaid CDN for flowcharts)
-- [ ] File is saved to the correct directory with proper naming (`MMDD-设计名称.html`)
+- [ ] Project structure is complete (package.json, vite.config.ts, src/ with all files)
+- [ ] Element Plus components render correctly with proper props and events
+- [ ] Colors match the screenshot (override CSS variables in element-overrides.css)
+- [ ] Layout proportions feel right (column widths, dialog dimensions, spacing)
+- [ ] All interactive elements work (tabs switch, dialogs open/close, form validation, pagination)
+- [ ] Mock data is realistic and fills the UI properly
+- [ ] Project can build without TypeScript errors
+- [ ] No emoji anywhere (unless user specifically requested)
+- [ ] Project is saved to correct directory with proper naming
 - [ ] Learning log is updated
+- [ ] Design system is updated if new patterns were discovered
 
 ## Handling "输出设计说明"
 
-When the user asks for design notes, output a concise list summarizing what was built or changed. Use this format:
+When the user asks for design notes, output a concise list:
 
 **页面名称 设计说明**
 - 变更 1：简要描述
 - 变更 2：简要描述
-- ...
+- Element Plus 组件：使用了哪些组件
+- 项目路径：`output/MMDD-设计名称/`
+- 启动方式：`cd output/MMDD-设计名称 && npm install && npm run dev`
 
-Keep it factual and brief. The user wants a record they can share with their team, not a detailed essay.
+Keep it factual and brief.
