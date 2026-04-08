@@ -10,7 +10,8 @@ This is a **Claude Code skills repository** — a curated collection of skills f
 
 - `.claude/skills/` — All installed skills, each with a `SKILL.md` and optional `references/` directory
 - `skills-lock.json` — Pins skill versions and sources (similar to a lockfile)
-- The primary custom skill is `space-image2proto/`
+- The primary custom skill is `img2element-plus/`
+- `output/` — Generated prototype projects
 
 ## Installed Skills
 
@@ -18,13 +19,13 @@ Skills are sourced from GitHub repos and locked in `skills-lock.json`:
 
 - **antfu** (`antfu/skills`) — Vite, Vue, Pinia, Vitest, Vue best practices, Vue Router, VueUse, web design guidelines
 - **element-plus-vue3** (`partme-ai/full-stack-skills`) — Element Plus component library for Vue 3
-- **space-image2proto** (local) — Screenshot-to-Vue prototype generator (Vue 3 + Vite + Element Plus)
+- **img2element-plus** (local) — Screenshot-to-Vue prototype generator (Vue 3 + Vite + Element Plus)
 
-## The `space-image2proto` Skill
+## The `img2element-plus` Skill
 
 This is the main custom skill. It converts UI screenshots into complete **Vue 3 + Vite + Element Plus** projects with iterative refinement and learning memory. Generated projects are runnable with `npm install && npm run dev`.
 
-**Key data files** (in `.claude/skills/space-image2proto/references/`):
+**Key data files** (in `.claude/skills/img2element-plus/references/`):
 - `config.json` — Output directory, project naming rules, tech stack config, onboarding status
 - `design_system.json` — Element Plus theme overrides (CSS variables), component mappings, custom colors
 - `learning_log.jsonl` — Append-only interaction history for improving future output

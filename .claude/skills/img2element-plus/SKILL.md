@@ -1,5 +1,5 @@
 ---
-name: space-image2proto
+name: img2element-plus
 description: |
   Screenshot-to-Vue prototype generator. Generates complete Vue 3 + Vite + Element Plus projects from UI screenshots, with iterative refinement and learning memory. Use this skill whenever the user provides a screenshot, mockup, wireframe, or image of any UI and wants it reproduced as a working Vue prototype — or when they want to modify an existing prototype they previously generated. Also triggers on: "照这个做原型", "参考这个图", "把这个页面画出来", "this UI needs to be prototyped", "replicate this design", "convert this mockup to Vue", "帮我出个原型", "根据截图输出页面", or any image attachment combined with requests like "输出页面", "做成页面", "帮我实现". Even if the user just sends a screenshot with a brief instruction like "加一个字段" or "这个也一样", this skill applies — it means they want you to modify or replicate the UI shown. When in doubt, if there's a UI screenshot in the conversation, use this skill.
 ---
