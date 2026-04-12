@@ -1,0 +1,6 @@
+/* Element Plus theme overrides — customize per project */
+:root {
+  --el-color-primary: #409eff;
+  --el-border-radius-base: 4px;
+  --el-font-size-base: 14px;
+}
