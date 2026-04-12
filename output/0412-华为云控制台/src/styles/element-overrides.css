@@ -1,0 +1,187 @@
+/* Huawei Cloud Console Theme Overrides for Element Plus */
+:root {
+  /* Primary Colors - Huawei Blue */
+  --el-color-primary: #0066FF;
+  --el-color-primary-light-3: #3385FF;
+  --el-color-primary-light-5: #66A3FF;
+  --el-color-primary-light-7: #99C2FF;
+  --el-color-primary-light-8: #B3D1FF;
+  --el-color-primary-light-9: #E6F0FF;
+  --el-color-primary-dark-2: #0052CC;
+
+  /* Status Colors */
+  --el-color-success: #52C41A;
+  --el-color-success-light-3: #7DD652;
+  --el-color-success-light-5: #A4E28D;
+  --el-color-success-light-9: #F6FFED;
+  --el-color-danger: #FF4D4F;
+  --el-color-danger-light-3: #FF7A7B;
+  --el-color-danger-light-5: #FFA6A7;
+  --el-color-danger-light-9: #FFF1F0;
+  --el-color-warning: #FA8C16;
+  --el-color-warning-light-3: #FBA64E;
+  --el-color-warning-light-5: #FDBF85;
+  --el-color-warning-light-9: #FFF7E6;
+  --el-color-info: #909399;
+  --el-color-info-light-3: #AEB1B5;
+  --el-color-info-light-5: #CBCDCE;
+  --el-color-info-light-9: #F4F4F5;
+
+  /* Text Colors */
+  --el-text-color-primary: #1A1A1A;
+  --el-text-color-regular: #666666;
+  --el-text-color-secondary: #666666;
+  --el-text-color-placeholder: #999999;
+  --el-text-color-disabled: #C0C4CC;
+
+  /* Border */
+  --el-border-color: #E8E8E8;
+  --el-border-color-light: #F0F0F0;
+  --el-border-color-lighter: #F5F7FA;
+  --el-border-color-extra-light: #FAFAFA;
+
+  /* Border Radius */
+  --el-border-radius-base: 4px;
+  --el-border-radius-small: 2px;
+  --el-border-radius-round: 4px;
+  --el-border-radius-circle: 50%;
+
+  /* Font */
+  --el-font-family: 'PingFang SC', 'Microsoft YaHei', -apple-system, sans-serif;
+  --el-font-size-base: 13px;
+  --el-font-size-small: 12px;
+  --el-font-size-large: 14px;
+  --el-font-weight-primary: 400;
+
+  /* Component Size */
+  --el-component-size: 32px;
+  --el-component-size-small: 28px;
+  --el-component-size-large: 36px;
+
+  /* Fill Colors */
+  --el-fill-color: #F5F7FA;
+  --el-fill-color-light: #FAFAFA;
+  --el-fill-color-lighter: #FAFAFA;
+  --el-fill-color-extra-light: #FFFFFF;
+  --el-fill-color-dark: #F0F0F0;
+  --el-fill-color-darker: #E8E8E8;
+  --el-fill-color-blank: #FFFFFF;
+
+  /* Background */
+  --el-bg-color: #FFFFFF;
+  --el-bg-color-page: #F5F7FA;
+  --el-bg-color-overlay: #FFFFFF;
+
+  /* Shadow */
+  --el-box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --el-box-shadow-light: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --el-box-shadow-lighter: 0 1px 2px rgba(0, 0, 0, 0.03);
+  --el-box-shadow-dark: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+  /* Button overrides */
+  --el-button-font-size: 13px;
+  --el-button-height: 32px;
+
+  /* Input overrides */
+  --el-input-height: 32px;
+
+  /* Table overrides */
+  --el-table-header-font-size: 12px;
+  --el-table-font-size: 13px;
+  --el-table-row-hover-bg-color: #F0F0F0;
+  --el-table-header-bg-color: #FAFAFA;
+  --el-table-border-color: #E8E8E8;
+}
+
+/* Global resets */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #app {
+  height: 100%;
+  font-family: 'PingFang SC', 'Microsoft YaHei', -apple-system, sans-serif;
+  font-size: 13px;
+  color: #1A1A1A;
+  background: #F5F7FA;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Button style overrides */
+.el-button--primary {
+  --el-button-bg-color: #0066FF;
+  --el-button-border-color: #0066FF;
+  --el-button-hover-bg-color: #0052CC;
+  --el-button-hover-border-color: #0052CC;
+  --el-button-active-bg-color: #003D99;
+  --el-button-active-border-color: #003D99;
+}
+
+.el-button--default {
+  --el-button-border-color: #E8E8E8;
+  --el-button-hover-border-color: #0066FF;
+  --el-button-hover-bg-color: #FFFFFF;
+  --el-button-hover-text-color: #0066FF;
+}
+
+/* Input style overrides */
+.el-input__wrapper {
+  border-radius: 4px;
+}
+
+.el-input__wrapper:hover {
+  box-shadow: 0 0 0 1px #0066FF inset;
+}
+
+.el-input__wrapper.is-focus {
+  box-shadow: 0 0 0 1px #0066FF inset;
+}
+
+/* Table style overrides */
+.el-table {
+  --el-table-border-color: #E8E8E8;
+  --el-table-header-text-color: #666666;
+  --el-table-text-color: #1A1A1A;
+  font-size: 13px;
+}
+
+.el-table thead th {
+  font-weight: 500;
+  font-size: 12px;
+}
+
+.el-table th.el-table__cell {
+  background-color: #FAFAFA;
+  font-weight: 500;
+  color: #666666;
+}
+
+/* Tag overrides */
+.el-tag {
+  border-radius: 2px;
+  font-size: 12px;
+}
+
+/* Pagination overrides */
+.el-pagination {
+  font-size: 12px;
+  --el-pagination-button-disabled-bg-color: #FFFFFF;
+}
+
+.el-pager li.is-active {
+  color: #0066FF;
+}
+
+/* Dialog overrides */
+.el-dialog {
+  border-radius: 4px;
+}
+
+/* Dropdown overrides */
+.el-dropdown-menu__item:hover {
+  background-color: #F0F0F0;
+  color: #0066FF;
+}
