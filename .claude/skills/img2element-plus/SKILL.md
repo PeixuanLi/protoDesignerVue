@@ -78,8 +78,11 @@ Before doing anything, read these files (if they exist):
 1. `references/config.json` — output directory, naming rules, tech stack, format preferences
 2. `references/design_system.json` — Element Plus theme overrides, component mappings, custom colors
 3. `references/learning_log.jsonl` — last 20 entries of accumulated interaction history
+4. **Any `DESIGN.md` or `HW-DESIGN.md` files in the project root** — user-authored design specs that describe the target visual style. These are the highest-priority source of truth for colors, typography, spacing, and component styling. Read them FIRST and use them to override both Element Plus defaults and the `design_system.json` defaults.
 
 If `config.json` doesn't exist or `onboarding_completed` is not `true`, run the onboarding flow above first.
+
+**Design spec priority order**: User-provided DESIGN.md > references/design_system.json > Element Plus defaults.
 
 ### Step 2: Analyze the screenshot
 
@@ -207,22 +210,24 @@ Remove pinia import if no stores are used.
 
 #### Design principles
 
-1. **Fidelity first.** Match the screenshot as closely as possible using Element Plus components. Override CSS variables in `element-overrides.css` when defaults don't match.
+1. **Fidelity first.** Match the screenshot as closely as possible. When a DESIGN.md exists, follow it as the ultimate authority. Override CSS variables in `element-overrides.css` when defaults don't match.
 
 2. **Component decomposition.** Split the page into focused `.vue` components. A list page with search + table + dialog becomes `SearchBar.vue`, `DataTable.vue`, `EditDialog.vue`. Each component uses `<script setup lang="ts">`.
 
-3. **Realistic mock data.** Generate Chinese-language mock data in `src/mock/data.ts` with realistic field names and values. Tables should show 10-15 rows, forms should have plausible default values.
+3. **Choose the right component strategy.** When the target design closely matches Element Plus defaults, use Element Plus components (`el-table`, `el-form`, `el-pagination`). When the design system is significantly different (like Huawei Cloud, Ant Design, or a custom enterprise theme), **write raw HTML/CSS** for those components and only use Element Plus for interactive primitives (dialogs, dropdowns, tooltips). See "Pitfalls & Lessons Learned" below for detailed guidance.
 
-4. **Functional interactivity.** All implied behavior must work: tabs switch, dialogs open/close, forms validate, steps navigate, tables sort, pagination works. Use Vue 3 reactivity — no vanilla DOM manipulation.
+4. **Realistic mock data.** Generate Chinese-language mock data in `src/mock/data.ts` with realistic field names and values. Tables should show 10-15 rows, forms should have plausible default values.
 
-5. **Element Plus conventions.** Use the component API correctly:
+5. **Functional interactivity.** All implied behavior must work: tabs switch, dialogs open/close, forms validate, steps navigate, tables sort, pagination works. Use Vue 3 reactivity — no vanilla DOM manipulation.
+
+6. **Element Plus conventions.** Use the component API correctly:
    - Form validation with `rules` and `ref="formRef"`
    - Table columns with `prop`, `label`, `width`, `#default` slots
    - Dialog with `v-model` for visibility, `@close` handler
    - Pagination with `v-model:current-page` and `v-model:page-size`
    - Message/Notification for feedback (not `alert()`)
 
-6. **No emoji, no watermarks.** Use Element Plus built-in icons (`<el-icon>`) or clean inline SVG. Only use emoji if the user specifically asks.
+7. **No emoji, no watermarks.** Use Element Plus built-in icons (`<el-icon>`) or clean inline SVG. Only use emoji if the user specifically asks.
 
 ### Step 4: Handle modification requests
 
@@ -544,12 +549,343 @@ Use Unicode circled numbers (①②③...) via `&#9312;` through `&#9326;` for m
 
 ---
 
+## Enterprise Console Layout Patterns
+
+When replicating cloud consoles (AWS, Huawei Cloud, Alibaba Cloud, etc.) or enterprise admin panels, these layout patterns consistently appear:
+
+### Fixed Header + Sidebar + Scrollable Content
+
+The standard enterprise console layout. Use CSS `position: fixed` for header and sidebar, `margin` on main content:
+
+```css
+/* Header - fixed top bar */
+.header-bar {
+  height: 48px;
+  background: #FFFFFF;
+  border-bottom: 1px solid #E8E8E8;
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+}
+
+/* Sidebar - fixed left panel */
+.sidebar {
+  width: 200px;
+  background: #FFFFFF;
+  border-right: 1px solid #E8E8E8;
+  position: fixed;
+  top: 48px; left: 0; bottom: 0;
+  overflow-y: auto;
+  z-index: 50;
+}
+
+/* Main content - scrollable */
+.main-content {
+  margin-top: 48px;
+  margin-left: 200px;
+  padding: 16px 24px;
+  min-height: calc(100vh - 48px);
+  background: #F5F7FA; /* gray page background */
+}
+```
+
+**Pitfall**: Do NOT use flex layout for this. Flex-based layouts with fixed header/sidebar cause resize and scroll issues. The `margin` approach is simpler and more reliable.
+
+### Console Header Bar
+
+```vue
+<header class="header-bar">
+  <div class="header-left">
+    <div class="header-logo"><!-- SVG logo + text --></div>
+    <nav class="header-nav">
+      <a v-for="item in navItems" :class="['nav-item', { active: activeNav === item.label }]">
+        {{ item.label }}
+      </a>
+    </nav>
+  </div>
+  <div class="header-right">
+    <div class="region-selector"><!-- Region dropdown --></div>
+    <button class="icon-btn"><!-- Search icon --></button>
+    <button class="icon-btn notification-btn">
+      <!-- Bell icon -->
+      <span class="notification-badge">3</span>
+    </button>
+    <div class="user-avatar"><!-- User icon/avatar --></div>
+  </div>
+</header>
+```
+
+Active nav tab: `color: primary; border-bottom: 2px solid primary;`. Notification badge: `position: absolute; top: 2px; right: 2px; background: red; border-radius: 50%; width: 16px; height: 16px; font-size: 10px`.
+
+### Collapsible Sidebar Navigation
+
+```vue
+<aside class="sidebar">
+  <div v-for="category in categories" :key="category.id" class="sidebar-category">
+    <div class="category-header" @click="toggleCategory(category.id)">
+      <span>{{ category.label }}</span>
+      <svg :class="['chevron-icon', { expanded: isExpanded(category.id) }]">...</svg>
+    </div>
+    <div v-if="isExpanded(category.id)" class="category-items">
+      <div v-for="item in category.items" :class="['sidebar-item', { active: activeItem === item.id }]">
+        <span>{{ item.label }}</span>
+        <span v-if="item.badge" :class="['item-badge', item.badgeType]">{{ item.badge }}</span>
+      </div>
+    </div>
+  </div>
+</aside>
+```
+
+**Key CSS**:
+- Active item: `color: primary` with `::before` pseudo-element: `position: absolute; left: 0; width: 2px; background: primary`
+- Category expand/collapse: `chevron-icon.expanded { transform: rotate(90deg); }`
+- Use `expandedCategories: ref<string[]>([])` array to track open categories
+- Badge styles: HOT = orange tint (`#FFF7E6` bg, `#FA8C16` text), NEW = blue tint (`#E6F0FF` bg, `#0066FF` text)
+- Custom scrollbar: `.sidebar::-webkit-scrollbar { width: 4px; } .sidebar::-webkit-scrollbar-thumb { background: #E8E8E8; border-radius: 2px; }`
+
+### Overview Stats Grid
+
+```vue
+<div class="overview-stats">
+  <div v-for="stat in stats" :key="stat.label" class="stat-card">
+    <div class="stat-value">{{ stat.value }}<span class="stat-unit">{{ stat.unit }}</span></div>
+    <div class="stat-label">{{ stat.label }}</div>
+    <div :class="['stat-trend', stat.trend]">
+      <!-- up/down/flat SVG arrow -->
+      <span>{{ stat.trendValue }}</span>
+    </div>
+  </div>
+</div>
+```
+
+Layout: `display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px`. Each card: `background: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 4px; padding: 16px; box-shadow: 0 1px 2px rgba(0,0,0,0.05)`.
+
+### Status Badge with Tinted Background
+
+When the design system uses custom status colors (not matching Element Plus tag types), use a statusMap with inline styles:
+
+```ts
+// In mock/data.ts
+export const statusMap: Record<string, { label: string; color: string; bgColor: string }> = {
+  running: { label: '运行中', color: '#52C41A', bgColor: '#F6FFED' },
+  stopped: { label: '已关机', color: '#909399', bgColor: '#F4F4F5' },
+  building: { label: '创建中', color: '#0066FF', bgColor: '#E6F0FF' },
+  error: { label: '异常', color: '#FF4D4F', bgColor: '#FFF1F0' },
+}
+```
+
+```vue
+<span class="status-badge" :style="{ color: statusMap[row.status].color, backgroundColor: statusMap[row.status].bgColor }">
+  {{ statusMap[row.status].label }}
+</span>
+```
+
+CSS: `.status-badge { display: inline-block; padding: 2px 8px; border-radius: 2px; font-size: 12px; }`
+
+**Why not `<el-tag>`**: `el-tag` has fixed color mappings tied to Element Plus theme. When the design spec provides exact hex colors for each status, overriding `el-tag` requires fighting against its built-in styles. Inline styles with a lookup map is cleaner and more maintainable.
+
+### Custom Tab Bar (Not `<el-tabs>`)
+
+When the design uses bottom-border indicator tabs (common in enterprise consoles):
+
+```vue
+<div class="content-tabs">
+  <div v-for="tab in tabs" :class="['content-tab', { active: activeTab === tab.key }]" @click="activeTab = tab.key">
+    {{ tab.label }}
+  </div>
+</div>
+```
+
+CSS: `.content-tab { padding: 12px 16px; border-bottom: 2px solid transparent; color: #666; }` / `.content-tab.active { color: primary; border-bottom-color: primary; font-weight: 500; }`
+
+---
+
+## Design Spec Integration (DESIGN.md)
+
+When the project contains a `DESIGN.md`, `HW-DESIGN.md`, or similar design spec file, it takes priority over everything else. Here's how to apply it:
+
+### Step 1: Extract CSS variable mapping
+
+Map design spec colors to Element Plus CSS variables in `element-overrides.css`. You need BOTH `:root` variable overrides AND component-level selectors:
+
+```css
+/* :root overrides set the base theme */
+:root {
+  --el-color-primary: #0066FF;          /* design spec primary */
+  --el-color-primary-light-3: #3385FF;  /* 30% lighter */
+  --el-color-primary-light-5: #66A3FF;  /* 50% lighter */
+  --el-color-primary-light-7: #99C2FF;  /* 70% lighter */
+  --el-color-primary-light-8: #B3D1FF;  /* 80% lighter */
+  --el-color-primary-light-9: #E6F0FF;  /* 90% lighter - used for tinted backgrounds */
+  --el-color-primary-dark-2: #0052CC;   /* 20% darker - hover state */
+  --el-text-color-primary: #1A1A1A;
+  --el-text-color-regular: #666666;
+  --el-text-color-placeholder: #999999;
+  --el-border-color: #E8E8E8;
+  --el-border-radius-base: 4px;
+  --el-font-size-base: 13px;
+  --el-bg-color-page: #F5F7FA;
+}
+
+/* Component-level overrides handle what :root can't */
+.el-button--primary {
+  --el-button-bg-color: #0066FF;
+  --el-button-border-color: #0066FF;
+  --el-button-hover-bg-color: #0052CC;  /* from design spec hover state */
+  --el-button-active-bg-color: #003D99; /* from design spec active state */
+}
+```
+
+### Step 2: Generate the full color scale
+
+Element Plus requires a complete color scale for each semantic color. When the design spec provides one base color (e.g., `#0066FF`), you must generate:
+
+| Variable | Purpose | How to derive |
+|----------|---------|---------------|
+| `--el-color-primary` | Base | From design spec |
+| `--el-color-primary-light-3` | 30% lighter | Mix with white |
+| `--el-color-primary-light-5` | 50% lighter | Mix with white |
+| `--el-color-primary-light-7` | 70% lighter | Mix with white |
+| `--el-color-primary-light-8` | 80% lighter | Mix with white |
+| `--el-color-primary-light-9` | Tinted background (90%) | Very light version, used for selected items, focus bg |
+| `--el-color-primary-dark-2` | Hover state | 20% darker than base |
+
+Apply this pattern to ALL semantic colors: `success`, `danger`, `warning`, `info`.
+
+### Step 3: Handle design spec specifics
+
+Common design spec properties and their CSS mapping:
+
+| Design Spec Property | CSS Target | Notes |
+|---------------------|------------|-------|
+| Primary color | `--el-color-primary` + full scale | Must generate all light variants |
+| Hover state | `--el-color-primary-dark-2` | Usually 20% darker |
+| Active/pressed state | `--el-button-active-bg-color` | Usually 40% darker |
+| Border color | `--el-border-color` | Often `#E8E8E8` for enterprise |
+| Border radius | `--el-border-radius-base` | 4px is enterprise standard |
+| Page background | `--el-bg-color-page` | Often `#F5F7FA` or `#F0F2F5` |
+| Table header bg | `--el-table-header-bg-color` | Often `#FAFAFA` |
+| Table hover | `--el-table-row-hover-bg-color` | Often `#F0F0F0` |
+| Font family | `--el-font-family` | Chinese-first: PingFang SC |
+| Font size base | `--el-font-size-base` | Enterprise: 12-13px |
+| Shadow card | `--el-box-shadow` | Enterprise: `0 1px 2px rgba(0,0,0,0.05)` |
+
+---
+
+## Pitfalls & Lessons Learned
+
+### 1. When to bypass Element Plus components
+
+**Rule**: If the design spec is a specific enterprise design system (Huawei Cloud, Ant Design, custom brand), write raw HTML/CSS for layout-heavy components. Only use Element Plus for interactive primitives.
+
+| Element | Use Element Plus? | Why |
+|---------|:-:|-----|
+| Dialog/Modal | YES | Complex interaction, focus trap, keyboard handling |
+| Dropdown/Select | YES | Accessibility, keyboard nav, search filtering |
+| Tooltip/Popover | YES | Positioning logic is complex |
+| Form validation | YES | Rules engine, error display |
+| Message/Notification | YES | Stacking, auto-close, positioning |
+| Table | SOMETIMES | If design matches EP defaults, use `el-table`. If custom borders/spacing, raw `<table>` is easier |
+| Pagination | SOMETIMES | Custom pagination gives pixel control. `el-pagination` for standard layouts |
+| Sidebar nav | NO | `el-menu` never matches enterprise sidebar styles. Custom is always better |
+| Tab bar | NO | `el-tabs` has rigid styling. Custom div tabs with border-bottom are trivial |
+| Search bar | NO | Enterprise search bars have label-above-input layout, not EP's inline form style |
+| Buttons | SOMETIMES | If you override EP button colors anyway, custom buttons are cleaner |
+| Status badges | NO | `el-tag` color mapping is inflexible. Use `statusMap` with inline styles |
+
+### 2. Element Plus CSS override gotchas
+
+**Pitfall: `--el-color-primary` alone is not enough**
+Element Plus computes many derived values from the primary color. You MUST provide the full light scale (`light-3` through `light-9`) and `dark-2`. Without these, hover states, disabled states, and tinted backgrounds will use wrong colors.
+
+**Pitfall: Buttons need component-level overrides**
+Setting `--el-color-primary` does NOT fully change button colors. You must also override:
+```css
+.el-button--primary {
+  --el-button-bg-color: #0066FF;
+  --el-button-border-color: #0066FF;
+  --el-button-hover-bg-color: #0052CC;
+  --el-button-hover-border-color: #0052CC;
+  --el-button-active-bg-color: #003D99;
+  --el-button-active-border-color: #003D99;
+}
+```
+
+**Pitfall: Input focus uses `box-shadow`, not `border`**
+Element Plus inputs use `box-shadow: 0 0 0 1px <color> inset` for focus state, not `border-color`. To change focus color:
+```css
+.el-input__wrapper:hover,
+.el-input__wrapper.is-focus {
+  box-shadow: 0 0 0 1px #0066FF inset;
+}
+```
+
+**Pitfall: Table header selector specificity**
+EP table headers use `th.el-table__cell`, not just `th`. To override header background:
+```css
+.el-table th.el-table__cell {
+  background-color: #FAFAFA;
+  font-weight: 500;
+  color: #666666;
+}
+```
+
+### 3. Layout pitfalls
+
+**Pitfall: Don't use flex for fixed chrome + scrollable content**
+Using `display: flex` with `height: 100vh` for the entire page causes issues when the content needs independent scrolling. The `position: fixed` header/sidebar + `margin` content approach is more reliable.
+
+**Pitfall: Sidebar needs custom scrollbar**
+Long sidebar menus with many items need scrollbar styling. Without it, the browser's default thick scrollbar looks jarring:
+```css
+.sidebar::-webkit-scrollbar { width: 4px; }
+.sidebar::-webkit-scrollbar-thumb { background: #E8E8E8; border-radius: 2px; }
+```
+
+**Pitfall: z-index layering**
+Use consistent z-index layers: header (100) > sidebar (50) > dropdowns/popovers (200) > modals (1000+). If header and sidebar share the same z-index, dropdowns from the header may appear behind the sidebar.
+
+### 4. Dependency management
+
+**Pitfall: Don't include Pinia if you don't need it**
+For single-page console prototypes with no shared state between components, skip Pinia entirely. Remove it from `main.ts` imports and `package.json` dependencies. Components use their own `ref()` and `computed()` for local state.
+
+**Pitfall: Don't include `@element-plus/icons-vue` for custom UIs**
+When building console-style prototypes with inline SVG icons, you don't need the Element Plus icon package. Only include it if you're using `<el-icon>` with EP icon components.
+
+### 5. SVG icon best practices
+
+For enterprise console prototypes, use inline SVGs with consistent conventions:
+
+```vue
+<!-- Standard icon pattern: viewBox="0 0 24 24", stroke-based -->
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+  <circle cx="11" cy="11" r="8"/>
+  <path d="m21 21-4.35-4.35"/>
+</svg>
+```
+
+Rules:
+- Use `viewBox="0 0 24 24"` for all icons (standard Feather/Lucide convention)
+- Use `stroke="currentColor"` so icons inherit text color
+- Use `stroke-width="2"` for consistent weight
+- Set display size via `width`/`height` attributes (16px for small, 14px for inline, 12px for micro)
+- Don't use `fill` on stroke-based icons (use `fill="none"`)
+
+---
+
 ## Quality checklist
 
 Before delivering any prototype, verify:
 
 - [ ] Project structure is complete (package.json, vite.config.ts, src/ with all files)
-- [ ] Element Plus components render correctly with proper props and events
+- [ ] **DESIGN.md compliance**: If a design spec file exists, verify all colors, font sizes, border-radius, and spacing values match the spec exactly
+- [ ] Element Plus CSS variables fully overridden (primary color + full light/dark scale, border, font, etc.)
+- [ ] Component-level CSS overrides applied where needed (buttons, inputs, table headers)
 - [ ] Colors match the screenshot (override CSS variables in element-overrides.css)
 - [ ] Layout proportions feel right (column widths, dialog dimensions, spacing)
 - [ ] All interactive elements work (tabs switch, dialogs open/close, form validation, pagination)
@@ -559,6 +895,8 @@ Before delivering any prototype, verify:
 - [ ] Project is saved to correct directory with proper naming
 - [ ] Learning log is updated
 - [ ] Design system is updated if new patterns were discovered
+- [ ] Pinia removed from dependencies if no shared state is needed
+- [ ] SVG icons use consistent viewBox="0 0 24 24" with stroke="currentColor"
 
 ## Handling "输出设计说明"
 
